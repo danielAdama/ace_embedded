@@ -12,6 +12,9 @@ from ordered_set import OrderedSet
 
 GREEN = (0, 255, 0)
 WHITE = (255, 255, 255)
+COLORS = [(np.random.randint(0, 255), np.random.randint(0, 255), np.random.randint(0, 255)) for _ in range(10)]
+ALLOWED_IDS = [0, 2]
+
 model = YOLO("yolov8s.pt")
 tracker = DeepSort(
     max_age=50,
@@ -23,7 +26,7 @@ tracker = DeepSort(
 )
 
 colors = [(np.random.randint(0, 255), np.random.randint(0, 255), np.random.randint(0, 255)) for j in range(10)]
-allowed_ids = [0, 2]
+ALLOWED_IDS = [0, 2]
 track_id_set = OrderedSet()
 detected_ids = []
 prev_frame_list = []
@@ -52,7 +55,6 @@ while True:
         class_id = int(data[5])
         results.append([[xmin, ymin, xmax - xmin, ymax - ymin], confidence, class_id])
 
-    track_id_list = list(sorted(track_id_set))
     prev_frame_list = list(cur_frame_set).copy()
 
     tracks = tracker.update_tracks(results, frame=frame)
@@ -63,14 +65,14 @@ while True:
         detected_ids.clear()
         for class_ids in results:
             for class_id in class_ids:
-                if class_id in allowed_ids:
+                if class_id in ALLOWED_IDS:
                     track_id = track.track_id
                     ltrb = track.to_ltrb()
-                    track_id_set.add(track_id)
                     cur_frame_set.add(frame_count)
 
                     if len(cur_frame_set) > len(prev_frame_list):
                         detected_ids.append(class_id)
+                        track_id_set.add(track_id)
 
         xmin, ymin, xmax, ymax = int(ltrb[0]), int(
             ltrb[1]), int(ltrb[2]), int(ltrb[3])
@@ -79,7 +81,8 @@ while True:
         cv2.rectangle(frame, (xmin, ymin - 20), (xmin + 20, ymin), GREEN, -1)
         cv2.putText(frame, str(track_id), (xmin + 5, ymin - 8),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, WHITE, 2)
-
+        
+    track_id_list = list(sorted(track_id_set))
     print("------------")
     print("Time(YYYY-MM-DD HH:MM:SS.ssssss):", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
     print("Objects:",[detections.names[class_id] for class_id in detected_ids])
