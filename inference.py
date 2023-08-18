@@ -21,8 +21,7 @@ tracker = DeepSort(
     embedder_gpu=True,
     embedder_model_name="mars-small128.pb",
 )
-s
-ALLOWED_IDS = [0, 2]
+
 track_id_set = OrderedSet()
 detected_ids = []
 prev_frame_list = []
@@ -30,7 +29,6 @@ cur_frame_set = set()
 frame_count = 0
 
 webcam = cv2.VideoCapture(config.VIDEO)
-CONFI_THRESH = 0.5
 
 while True:
     success, frame = webcam.read()
@@ -44,7 +42,7 @@ while True:
     for data in detections.boxes.data.tolist():
         confidence = data[4]
 
-        if float(confidence) < CONFI_THRESH:
+        if float(confidence) < config.CONFI_THRESH:
             continue
 
         xmin, ymin, xmax, ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3])
@@ -61,7 +59,7 @@ while True:
         detected_ids.clear()
         for class_ids in results:
             for class_id in class_ids:
-                if class_id in ALLOWED_IDS:
+                if class_id in config.ALLOWED_IDS:
                     track_id = track.track_id
                     ltrb = track.to_ltrb()
                     cur_frame_set.add(frame_count)
@@ -73,10 +71,10 @@ while True:
         xmin, ymin, xmax, ymax = int(ltrb[0]), int(
             ltrb[1]), int(ltrb[2]), int(ltrb[3])
         
-        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), GREEN, 2)
-        cv2.rectangle(frame, (xmin, ymin - 20), (xmin + 20, ymin), GREEN, -1)
+        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), config.GREEN, 2)
+        cv2.rectangle(frame, (xmin, ymin - 20), (xmin + 20, ymin), config.GREEN, -1)
         cv2.putText(frame, str(track_id), (xmin + 5, ymin - 8),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, WHITE, 2)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, config.WHITE, 2)
 
     logging.info("Time(YYYY-MM-DD HH:MM:SS.ssssss): %s", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
     logging.info("Objects: %s", [detections.names[class_id] for class_id in detected_ids])

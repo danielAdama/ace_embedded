@@ -7,3 +7,4 @@ GREEN = (0, 255, 0)
 WHITE = (255, 255, 255)
 COLORS = [(np.random.randint(0, 255), np.random.randint(0, 255), np.random.randint(0, 255)) for _ in range(10)]
 ALLOWED_IDS = [0, 2]
+CONFI_THRESH = 0.5
