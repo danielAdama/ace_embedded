@@ -75,7 +75,8 @@ while True:
         cv2.rectangle(frame, (xmin, ymin - 20), (xmin + 20, ymin), config.GREEN, -1)
         cv2.putText(frame, str(track_id), (xmin + 5, ymin - 8),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, config.WHITE, 2)
-
+        
+    logging.info("------------")
     logging.info("Time(YYYY-MM-DD HH:MM:SS.ssssss): %s", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
     logging.info("Objects: %s", [detections.names[class_id] for class_id in detected_ids])
     logging.info("Object Bounding Boxes (x, y, w, h): %s", [[box[0][0], box[0][1], box[0][2], box[0][3]] for box in results])

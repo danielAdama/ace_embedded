@@ -1,5 +1,7 @@
 det_venv
 train_data
+glove.6B.zip
+glove.6B
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
