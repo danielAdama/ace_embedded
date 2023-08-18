@@ -7,7 +7,9 @@ import argparse
 from deep_sort_realtime.deepsort_tracker import DeepSort
 from config import config
 from ordered_set import OrderedSet
-
+import logging
+logging.basicConfig(filename='output_log.txt', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.getLogger().addHandler(logging.NullHandler())
 
 
 GREEN = (0, 255, 0)
@@ -56,7 +58,7 @@ while True:
         results.append([[xmin, ymin, xmax - xmin, ymax - ymin], confidence, class_id])
 
     prev_frame_list = list(cur_frame_set).copy()
-
+    track_id_list = list(sorted(track_id_set))
     tracks = tracker.update_tracks(results, frame=frame)
     for track in tracks:
         if not track.is_confirmed():
@@ -81,15 +83,14 @@ while True:
         cv2.rectangle(frame, (xmin, ymin - 20), (xmin + 20, ymin), GREEN, -1)
         cv2.putText(frame, str(track_id), (xmin + 5, ymin - 8),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, WHITE, 2)
-        
-    track_id_list = list(sorted(track_id_set))
-    print("------------")
-    print("Time(YYYY-MM-DD HH:MM:SS.ssssss):", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
-    print("Objects:",[detections.names[class_id] for class_id in detected_ids])
-    print("Object Bounding Boxes (x, y, w, h):",[[box[0][0], box[0][1], box[0][2], box[0][3]] for box in results])
-    print("Object Track IDs:",track_id_list)
-    print("Frame Size (height, width in pixels):",(height, width))
-    # print("Frame Summary:",)
+
+    logging.info("Time(YYYY-MM-DD HH:MM:SS.ssssss): %s", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
+    logging.info("Objects: %s", [detections.names[class_id] for class_id in detected_ids])
+    logging.info("Object Bounding Boxes (x, y, w, h): %s", [[box[0][0], box[0][1], box[0][2], box[0][3]] for box in results])
+    logging.info("Object Track IDs: %s", track_id_list)
+    logging.info("Frame Size (height, width in pixels): (%d, %d)", height, width)
+    # logging.info("Frame Summary: )
+    # print("Output has been logged to output_log.txt")
     
 
     cv2.imshow('Live', frame)
