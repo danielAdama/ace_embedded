@@ -12,11 +12,6 @@ logging.basicConfig(filename='output_log.txt', level=logging.INFO, format='%(asc
 logging.getLogger().addHandler(logging.NullHandler())
 
 
-GREEN = (0, 255, 0)
-WHITE = (255, 255, 255)
-COLORS = [(np.random.randint(0, 255), np.random.randint(0, 255), np.random.randint(0, 255)) for _ in range(10)]
-ALLOWED_IDS = [0, 2]
-
 model = YOLO("yolov8s.pt")
 tracker = DeepSort(
     max_age=50,
@@ -26,8 +21,7 @@ tracker = DeepSort(
     embedder_gpu=True,
     embedder_model_name="mars-small128.pb",
 )
-
-colors = [(np.random.randint(0, 255), np.random.randint(0, 255), np.random.randint(0, 255)) for j in range(10)]
+s
 ALLOWED_IDS = [0, 2]
 track_id_set = OrderedSet()
 detected_ids = []
