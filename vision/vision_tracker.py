@@ -51,4 +51,4 @@ class VisionTracker:
                             self.detected_ids.append(class_id)
                             self.track_id_set.add(track_id)
 
-        return detections, self.detected_ids, track_id_list, tracks
+        return results, detections, self.detected_ids, track_id_list, tracks
