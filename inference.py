@@ -1,5 +1,4 @@
 import datetime
-from ultralytics import YOLO
 import cv2
 import numpy as np
 import datetime
@@ -8,18 +7,16 @@ from deep_sort_realtime.deepsort_tracker import DeepSort
 from config import config
 from ordered_set import OrderedSet
 import logging
-logging.basicConfig(filename='output_log.txt', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename=config.LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.getLogger().addHandler(logging.NullHandler())
 
-
-model = YOLO("yolov8s.pt")
 tracker = DeepSort(
-    max_age=50,
-    max_cosine_distance=0.3,
-    nn_budget=5,
-    embedder="mobilenet",
-    embedder_gpu=True,
-    embedder_model_name="mars-small128.pb",
+    max_age=config.MAX_AGE,
+    max_cosine_distance=config.MAX_COS_DIST,
+    nn_budget=config.NN_BUDGET,
+    embedder=config.EMBEDDER,
+    embedder_gpu=config.is_GPU,
+    embedder_model_name=config.EMBEDDER_MODEL,
 )
 
 track_id_set = OrderedSet()
@@ -36,7 +33,7 @@ while True:
         break
     frame_count += 1
     (height, width) = frame.shape[:2]
-    detections = model(frame)[0]
+    detections = config.MODEL(frame)[0]
     results = []
 
     for data in detections.boxes.data.tolist():
