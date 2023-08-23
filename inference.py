@@ -23,7 +23,7 @@ while True:
 
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     (height, width) = frame.shape[:2]
-    predicted_caption = vision_tracker.generate_caption(frame)
+    predicted_caption = vision_tracker.generate_caption(frame_rgb)
     results, detections, detected_ids, track_id_list, tracks = vision_tracker.process_frame(frame_rgb, frame_count)
     detected_object_names = [detections.names[class_id] for class_id in detected_ids]
     obj_dim = [[box[0][0], box[0][1], box[0][2], box[0][3]] for box in results]
@@ -44,7 +44,7 @@ while True:
     logging.info("Object Bounding Boxes (x, y, w, h): %s", obj_dim)
     logging.info("Object Track IDs: %s", track_id_list)
     logging.info("Frame Size (height, width in pixels): (%d, %d)", height, width)
-    logging.info("Frame Summary: %s", predicted_caption)
+    logging.info("Frame Summary: %s", predicted_caption.capitalize())
     
     cv2.imshow('Live', frame)
     key = cv2.waitKey(5)
