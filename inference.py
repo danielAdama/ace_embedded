@@ -6,18 +6,25 @@ import logging
 logging.basicConfig(filename=config.LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.getLogger().addHandler(logging.NullHandler())
 
-webcam = cv2.VideoCapture(config.VIDEO)
+
+cap = cv2.VideoCapture(config.VIDEO)
 frame_count = 0
 vision_tracker = VisionTracker(config)
 
+if not cap.isOpened():
+    raise ValueError("Could not open video stream")
+
 while True:
-    success, frame = webcam.read()
+    success, frame = cap.read()
     if not success:
         break
 
-    (height, width) = frame.shape[:2]
     frame_count += 1
-    results, detections, detected_ids, track_id_list, tracks = vision_tracker.process_frame(frame, frame_count)
+
+    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    (height, width) = frame.shape[:2]
+    predicted_caption = vision_tracker.generate_caption(frame)
+    results, detections, detected_ids, track_id_list, tracks = vision_tracker.process_frame(frame_rgb, frame_count)
     detected_object_names = [detections.names[class_id] for class_id in detected_ids]
     obj_dim = [[box[0][0], box[0][1], box[0][2], box[0][3]] for box in results]
     for track in tracks:
@@ -37,12 +44,12 @@ while True:
     logging.info("Object Bounding Boxes (x, y, w, h): %s", obj_dim)
     logging.info("Object Track IDs: %s", track_id_list)
     logging.info("Frame Size (height, width in pixels): (%d, %d)", height, width)
-    # logging.info("Frame Summary: )
+    logging.info("Frame Summary: %s", predicted_caption)
     
     cv2.imshow('Live', frame)
     key = cv2.waitKey(5)
     if key == 27:
         break
 
-webcam.release()
+cap.release()
 cv2.destroyAllWindows()

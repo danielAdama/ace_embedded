@@ -2,6 +2,7 @@ import os
 from ultralytics import YOLO
 import numpy as np
 import cv2
+import torch
 
 VIDEO_PATH = os.path.join(os.getcwd(),'video')
 VIDEO = os.path.join(VIDEO_PATH, 'footage.mp4')
@@ -19,3 +20,7 @@ MAX_COS_DIST=0.3
 NN_BUDGET=5
 FONT=cv2.FONT_HERSHEY_SIMPLEX
 LOG_FILE='output_log.txt'
+IMAGE_CAPTION = "nlpconnect/vit-gpt2-image-captioning"
+MAX_LEN = 14
+NUM_BEAMS = 2
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"

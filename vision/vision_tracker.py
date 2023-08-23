@@ -1,3 +1,4 @@
+from transformers import VisionEncoderDecoderModel, ViTImageProcessor, AutoTokenizer
 from deep_sort_realtime.deepsort_tracker import DeepSort
 from ordered_set import OrderedSet
 
@@ -16,6 +17,19 @@ class VisionTracker:
         self.detected_ids = []
         self.prev_frame_list = []
         self.cur_frame_set = set()
+        self.model = VisionEncoderDecoderModel.from_pretrained(config.IMAGE_CAPTION)
+        self.feature_extractor = ViTImageProcessor.from_pretrained(config.IMAGE_CAPTION)
+        self.tokenizer = AutoTokenizer.from_pretrained(config.IMAGE_CAPTION)
+        self.model.to(config.DEVICE)
+        self.gen_kwargs = {"max_length": config.MAX_LEN, "num_beams": config.NUM_BEAMS}
+
+    
+    def generate_caption(self, frame):
+        pixel_values = self.feature_extractor(images=frame, return_tensors="pt").pixel_values
+        pixel_values = pixel_values.to(self.config.DEVICE)
+        output_ids = self.model.generate(pixel_values, **self.gen_kwargs)
+        preds = self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0]
+        return preds.strip()
 
     def process_frame(self, frame, frame_count):
         self.frame = frame

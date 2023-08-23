@@ -1,5 +1,6 @@
 det_venv
 train_data
+notebook/features.pkl
 glove.6B.zip
 glove.6B
 # Byte-compiled / optimized / DLL files
