@@ -1,21 +1,27 @@
-# -*- coding: utf-8 -*-
 import threading
 import time
-
 import cv2
 
-
 class Camera:
-    def __init__(self):
+    def __init__(self, camera_index=0, video_path=None, resize=None):
         self.thread = None
-        self.current_frame  = None
+        self.current_frame = None
         self.last_access = None
-        self.is_running: bool = False
-        self.camera = cv2.VideoCapture(0)
+        self.is_running = False
+        self.camera = None
+
+        if video_path is not None:
+            self.camera = cv2.VideoCapture(video_path)
+        else:
+            self.camera = cv2.VideoCapture(camera_index)
+
         if not self.camera.isOpened():
-            raise Exception("Could not open video device")
-        self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            raise Exception("Could not open video source")
+
+        if resize is not None:
+            width, height = resize
+            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
     def __del__(self):
         self.camera.release()
@@ -38,7 +44,6 @@ class Camera:
         self.is_running = True
         self.last_access = time.time()
         while self.is_running:
-            time.sleep(0.05)
             ret, frame = self.camera.read()
             if ret:
                 ret, encoded = cv2.imencode(".jpg", frame)
