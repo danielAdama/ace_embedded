@@ -63,7 +63,7 @@ def plot_box(image, bboxes, label):
 
     return image
 
-def process_images(source_dir, target_dir):
+def process_images(source_dir:str, target_dir:str, is_modify_class:bool =False):
     total_images = 0
     total_labels = 0
 
@@ -117,11 +117,15 @@ def process_images(source_dir, target_dir):
                             wf = float(w)
                             hf = float(h)
 
-                            if class_id in class_id_mapping:
-                                label = class_id_mapping[class_id]
+                            if not is_modify_class:
+                                bboxes.append([x_ctrf, y_ctrf, wf, hf])
+                                labels.append([class_id])
+                            else:
+                                if class_id in class_id_mapping:
+                                    label = class_id_mapping[class_id]
+                                    labels.append([label])
 
-                            bboxes.append([x_ctrf, y_ctrf, wf, hf])
-                            labels.append([label])
+                            bboxes.append([x_ctrf, y_ctrf, wf, hf])                            
 
                             modified_data.append((label, x_ctr, y_ctr, w, h))
                         else:
@@ -166,18 +170,14 @@ def show_detections(image_paths, label_paths):
     random.shuffle(all_images)
 
     class_label = {
-    '1':'bus',
-    '1':'bus',
-    '1':'bus',
-    '1':'bus',
-    '7':'truck',
-    '7':'truck',
-    '7':'truck',
-    '7':'truck',
-    '7':'truck',
-    '7':'truck',
-    '7':'truck',
-    '6':'vehicle'
+        '0': 'bicycle',
+        '1': 'bus',
+        '2': 'crosswalk',
+        '3': 'fire hydrant',
+        '4': 'motorcycle',
+        '5': 'traffic light',
+        '6': 'vehicle',
+        '7': 'truck'
     }
 
     plt.figure(figsize=(15, 12))
@@ -221,7 +221,7 @@ def main(args):
         os.path.join(args.target_dir, 'train', 'labels'),
     )
     if args.mode == 'prepare-detections':
-        process_images(args.source_dir, args.target_dir)
+        process_images(args.source_dir, args.target_dir, args.is_modify_class)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process images and labels.")
@@ -229,5 +229,7 @@ if __name__ == "__main__":
     parser.add_argument("--target-dir", type=str, required=True, help="Target directory to save processed images and labels.")
     parser.add_argument('--mode', type=str, choices=['show-detections', 'prepare-detections'], default='prepare detections',
                         help="Choose 'show detections' to display detections or 'prepare detections' to process images and labels.")
+    parser.add_argument('--is-modify-class', action='store_true', default=False,
+                        help="Specify whether to modify class_id with class_id_mapping.")
     args = parser.parse_args()
     main(args)
