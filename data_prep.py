@@ -10,19 +10,19 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
+# Previous class -> new class
+# Key -> Value
 class_id_mapping = {
-    '0': '1',
-    '2': '1',
-    '3': '1',
-    '6': '1',
-    '1': '7',
-    '5': '7',
-    '7': '7',
-    '8': '7',
-    '9': '7',
-    '10': '7',
-    '11': '7',
-    '4': '6',
+    '0': '9',
+    '1': '9',
+    '2': '9',
+    '3': '9',
+    '4': '9',
+    '5': '9',
+    '6': '9',
+    '8': '9',
+    '9': '9',
+    '7': '8'
 }
 
 def create_directories_if_not_exist(directory):
@@ -58,7 +58,7 @@ def plot_box(image, bboxes, label):
             cv2.FONT_HERSHEY_COMPLEX,
             1,
             (0, 255, 25),
-            1
+            2
         )
 
     return image
@@ -67,6 +67,7 @@ def process_images(source_dir:str, target_dir:str, is_modify_class:bool = False)
     total_images = 0
     total_labels = 0
 
+    logging.info(f"Working on {os.path.basename(source_dir)} data.....")
     for dataset in ['train', 'test', 'valid']:
         source_dataset_dir = os.path.join(source_dir, dataset)
         target_dataset_dir = os.path.join(target_dir, dataset)
@@ -168,6 +169,7 @@ def show_detections(image_paths, label_paths):
     all_images.extend(glob.glob(os.path.join(image_paths, '*.jpeg')))
     all_images.extend(glob.glob(os.path.join(image_paths, '*.JPG')))
 
+    # Shuffle the list of images only once to avoid duplicates
     random.shuffle(all_images)
 
     class_label = {
@@ -178,42 +180,57 @@ def show_detections(image_paths, label_paths):
         '4': 'motorcycle',
         '5': 'traffic light',
         '6': 'vehicle',
-        '7': 'truck'
+        '7': 'truck',
+        '8': 'person',
+        '9': 'animal'
     }
 
     plt.figure(figsize=(15, 12))
-    for i in range(num_samples):
-        j = random.randint(0,num_samples-1)
-        image_name = all_images[j]
-        image_name = '.'.join(image_name.split(os.path.sep)[-1].split('.')[:-1])
-        image = cv2.imread(all_images[j])
-        with open(os.path.join(label_paths, image_name+'.txt'), 'r') as f:
-            bboxes = []
-            labels = []
-            label_lines = f.readlines()
+    num_rows = 2
+    num_cols = 2
+    idx = 0
 
-        for line in label_lines:
-            class_id = line[0]
-            bbox_str = line[2:]
-            x_ctr, y_ctr, w, h = bbox_str.split(' ')
-            x_ctrf = float(x_ctr)
-            y_ctrf = float(y_ctr)
-            wf = float(w)
-            hf = float(h)
+    for i in range(num_rows):
+        for j in range(num_cols):
+            if idx >= num_samples:
+                break
 
-            if class_id in class_label:
-                label = class_label[class_id]
-            
-            bboxes.append([x_ctrf, y_ctrf, wf, hf])
-            labels.append([label])
-        
-        result_img =  plot_box(image, bboxes, labels)
-        plt.subplot(2, 2, i+1)
-        plt.imshow(result_img[:, :, ::-1])
-        plt.axis('off')
-    plt.subplots_adjust(wspace=1)
+            j = random.randint(0, len(all_images) - 1)
+            image_name = all_images[j]
+            image_name = '.'.join(image_name.split(os.path.sep)[-1].split('.')[:-1])
+
+            image = cv2.imread(all_images[j])
+            with open(os.path.join(label_paths, image_name + '.txt'), 'r') as f:
+                bboxes = []
+                labels = []
+                label_lines = f.readlines()
+
+            for line in label_lines:
+                class_id = line[0]
+                bbox_str = line[2:]
+                x_ctr, y_ctr, w, h = bbox_str.split(' ')
+                x_ctrf = float(x_ctr)
+                y_ctrf = float(y_ctr)
+                wf = float(w)
+                hf = float(h)
+
+                if class_id in class_label:
+                    label = class_label[class_id]
+
+                bboxes.append([x_ctrf, y_ctrf, wf, hf])
+                labels.append([label])
+
+            result_img = plot_box(image, bboxes, labels)
+            plt.subplot(num_rows, num_cols, idx + 1)
+            plt.imshow(result_img[:, :, ::-1])
+            plt.axis('off')
+            idx += 1
+
+    plt.subplots_adjust(wspace=0.2, hspace=0.2)
     plt.tight_layout()
     plt.show()
+
+
 
 def main(args):
     if args.mode == 'show-detections':
