@@ -63,7 +63,7 @@ def plot_box(image, bboxes, label):
 
     return image
 
-def process_images(source_dir:str, target_dir:str, is_modify_class:bool =False):
+def process_images(source_dir:str, target_dir:str, is_modify_class:bool = False):
     total_images = 0
     total_labels = 0
 
@@ -120,14 +120,15 @@ def process_images(source_dir:str, target_dir:str, is_modify_class:bool =False):
                             if not is_modify_class:
                                 bboxes.append([x_ctrf, y_ctrf, wf, hf])
                                 labels.append([class_id])
+                                modified_data.append((class_id, x_ctr, y_ctr, w, h))  # Append class_id here
                             else:
+                                label = ""
                                 if class_id in class_id_mapping:
                                     label = class_id_mapping[class_id]
                                     labels.append([label])
-
-                            bboxes.append([x_ctrf, y_ctrf, wf, hf])                            
-
-                            modified_data.append((label, x_ctr, y_ctr, w, h))
+                                    bboxes.append([x_ctrf, y_ctrf, wf, hf])
+                                
+                                modified_data.append((label, x_ctr, y_ctr, w, h))
                         else:
                             # Print information about the skipped line
                             file_name = os.path.basename(label_file.name)
@@ -155,9 +156,9 @@ def process_images(source_dir:str, target_dir:str, is_modify_class:bool =False):
                 new_image_path = os.path.join(target_data_dir, os.path.basename(image_path))
                 shutil.copy(image_path, new_image_path)
 
-    logger.info("\nTotal ->")
-    logger.info(f"  Images: {total_images} processed")
-    logger.info(f"  Labels: {total_labels} processed")
+    logger.info("\n")
+    logger.info(f"  Total -> Images: {total_images} processed")
+    logger.info(f"  Total -> Labels: {total_labels} processed")
 
 
 def show_detections(image_paths, label_paths):
@@ -225,7 +226,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process images and labels.")
-    parser.add_argument("--source-dir", type=str, required=True, help="Source directory containing the images and labels.")
+    parser.add_argument("--source-dir", type=str, required=False, help="Source directory containing the images and labels.")
     parser.add_argument("--target-dir", type=str, required=True, help="Target directory to save processed images and labels.")
     parser.add_argument('--mode', type=str, choices=['show-detections', 'prepare-detections'], default='prepare detections',
                         help="Choose 'show detections' to display detections or 'prepare detections' to process images and labels.")
